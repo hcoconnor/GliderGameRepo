@@ -66,12 +66,15 @@ public class PlayerControlScript : MonoBehaviour
                 //do jump if on ground; else switch to flying
                 if (Physics.CheckSphere(groundCheck.transform.position,
                         groundCheck.radius,
-                        LayerMask.NameToLayer("Ground")))
+                        LayerMask.GetMask("Ground")))
+                        
                 {
                     //is on ground, so jump
 
                     playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                     Debug.Log("jump");
+
+
                 }
                 else
                 {
