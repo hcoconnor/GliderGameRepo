@@ -108,7 +108,7 @@ public class PlayerControlScript : MonoBehaviour
                     {
                         //reverse speed
                         intendedMoveTime = Mathf.Clamp(intendedMoveTime - 2.5f*Time.deltaTime, 0, walkAccelerationTime);
-                        Debug.Log(intendedMoveTime);
+                        //Debug.Log(intendedMoveTime);
                     }
                     else
                     {
@@ -140,6 +140,13 @@ public class PlayerControlScript : MonoBehaviour
             actualMoveVec.Normalize();
             actualMoveVec *= newSpeed;
 
+            //face direction of movement
+
+            Transform playerModelTrans = playerTrans.Find("playerModel").transform;
+            playerModelTrans.rotation = Quaternion.RotateTowards(playerModelTrans.rotation, Quaternion.LookRotation(actualMoveVec),360* Time.deltaTime);
+            Debug.Log(playerModelTrans.rotation);
+
+
 
             
 
@@ -154,7 +161,9 @@ public class PlayerControlScript : MonoBehaviour
                 {
                     //is on ground, so jump
 
-                    playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                    //playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                    playerRB.velocity += Vector3.up * jumpForce;
+
                     Debug.Log("jump");
 
 
