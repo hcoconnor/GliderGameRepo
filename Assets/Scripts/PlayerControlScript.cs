@@ -5,14 +5,25 @@ using UnityEngine;
 public class PlayerControlScript : MonoBehaviour
 {
 
-    public Transform playerCamTrans;
+    
 
-    public float camSensitivity;
+    [Header("Walking")]
     public float maxWalkSpeed;
     //public float walkSpeedScale;
     public float walkAccelerationTime = 1; //in seconds
     public AnimationCurve walkCurve;
     public float jumpForce;
+
+
+    [Header("Gliding")]
+    public float maxRollSpeed;
+    public float maxPitchSpeed;
+
+
+
+    [Header("Other")]
+    public Transform playerCamTrans;
+    public float camSensitivity;
 
     public SphereCollider groundCheck;
 
@@ -28,7 +39,7 @@ public class PlayerControlScript : MonoBehaviour
     float intendedMoveTime;
     Vector3 actualMoveVec;
 
-    bool flying = false;
+    bool flying = true;
 
     // Start is called before the first frame update
     void Start()
@@ -47,6 +58,53 @@ public class PlayerControlScript : MonoBehaviour
         if (flying)
         {
             //gliding cam controls
+
+
+            
+
+            playerCamTrans.Rotate(0, mouseX, 0);
+            playerCamTrans.Rotate(mouseY, 0, 0);
+
+            //clamp vertical camera angle
+            float xRot;
+            if(playerCamTrans.localEulerAngles.x < 180)
+            {
+                xRot = Mathf.Clamp(playerCamTrans.localEulerAngles.x, 0, 60);
+            }
+            else
+            {
+                xRot = Mathf.Clamp(playerCamTrans.localEulerAngles.x, 300, 360);
+            }
+
+
+            playerCamTrans.localEulerAngles = new Vector3(
+                xRot,
+                playerCamTrans.localEulerAngles.y,
+                0
+                );
+
+
+
+            //gliding moving controls
+            moveVert = Input.GetAxis("Vertical");
+            moveHorz = Input.GetAxis("Horizontal");
+
+            Transform camDir = new GameObject().transform;
+            camDir.rotation = Quaternion.Euler(0, playerCamTrans.rotation.eulerAngles.y, 0);
+
+            Vector3 playerRot = playerTrans.rotation.eulerAngles;
+            playerRot.x += -moveVert * maxPitchSpeed*Time.deltaTime;
+            playerRot.z += -moveHorz * maxRollSpeed * Time.deltaTime;
+
+            playerTrans.rotation = Quaternion.Euler(playerRot);
+
+
+
+
+
+
+            Destroy(camDir.gameObject);
+
 
         }
         else
@@ -120,7 +178,7 @@ public class PlayerControlScript : MonoBehaviour
                 intendedMoveVec *= Mathf.Clamp(intendedMoveTime, 0, walkAccelerationTime);
 
             }
-            
+
 
             Destroy(camDir.gameObject);
 
@@ -171,6 +229,7 @@ public class PlayerControlScript : MonoBehaviour
                 else
                 {
                     // is not on ground, so switch to flying
+                    flying = true;
                     Debug.Log("not jump");
                 }
 
@@ -187,6 +246,11 @@ public class PlayerControlScript : MonoBehaviour
         if (flying)
         {
             //flying movement forces
+
+
+
+
+
 
         }
         else
