@@ -41,7 +41,7 @@ public class PlayerControlScript : MonoBehaviour
     float intendedMoveTime;
     Vector3 actualMoveVec;
 
-    bool flying = true;
+    bool flying = false;
 
     // Start is called before the first frame update
     void Start()
@@ -111,14 +111,14 @@ public class PlayerControlScript : MonoBehaviour
             //
             //      angle of attack == angle between wing and direction of travel
 
-            float angleOfAttack = Vector3.Angle(playerRB.velocity, playerTrans.rotation.eulerAngles);
+            float angleOfAttack = Vector3.Angle(playerRB.velocity, playerTrans.Find("playerModel").forward);
             
             float liftCoef = lifeCoefCurve.Evaluate(angleOfAttack);
             float lift = .00326f * Mathf.Pow(playerRB.velocity.magnitude,2) * wingArea * liftCoef;
 
 
             float dragCoef = dragCoefCurve.Evaluate(angleOfAttack);
-            float drag = .00326f * Mathf.Pow(playerRB.velocity.magnitude, 2) * wingArea * dragCoef;
+            float drag = (.00326f * Mathf.Pow(playerRB.velocity.magnitude, 2))/2 * wingArea * dragCoef;
 
             //deal with thrust to add later
             
