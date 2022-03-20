@@ -18,7 +18,9 @@ public class PlayerControlScript : MonoBehaviour
     [Header("Gliding")]
     public float maxRollSpeed;
     public float maxPitchSpeed;
-
+    public AnimationCurve lifeCoefCurve;
+    public AnimationCurve dragCoefCurve;
+    public float wingArea;
 
 
     [Header("Other")]
@@ -92,18 +94,65 @@ public class PlayerControlScript : MonoBehaviour
             Transform camDir = new GameObject().transform;
             camDir.rotation = Quaternion.Euler(0, playerCamTrans.rotation.eulerAngles.y, 0);
 
-            Vector3 playerRot = playerTrans.rotation.eulerAngles;
+            Vector3 playerRot = playerTrans.localRotation.eulerAngles;
             playerRot.x += -moveVert * maxPitchSpeed*Time.deltaTime;
             playerRot.z += -moveHorz * maxRollSpeed * Time.deltaTime;
 
             playerTrans.rotation = Quaternion.Euler(playerRot);
 
 
+            //calculate movement
+
+            //  lift = k*V^2*A*cl
+            //      k = Smeaton's coefficient or pressure factor ( ~ .00326)
+            //      V^2 = velocity^2
+            //      A = area of wing
+            //      cl = lift coefficient (which is based on angle of attack)
+            //
+            //      angle of attack == angle between wing and direction of travel
+
+            float angleOfAttack = Vector3.Angle(playerRB.velocity, playerTrans.rotation.eulerAngles);
+            
+            float liftCoef = lifeCoefCurve.Evaluate(angleOfAttack);
+            float lift = .00326f * Mathf.Pow(playerRB.velocity.magnitude,2) * wingArea * liftCoef;
+
+
+            float dragCoef = dragCoefCurve.Evaluate(angleOfAttack);
+            float drag = .00326f * Mathf.Pow(playerRB.velocity.magnitude, 2) * wingArea * dragCoef;
+
+            //deal with thrust to add later
+            
+
+            Debug.Log(lift + " " + drag + " "+angleOfAttack);
+            Vector3 liftVec = playerTrans.up * lift * Time.fixedDeltaTime;
+            Vector3 dragVec = playerRB.velocity * -1* drag * Time.fixedDeltaTime;
+            
 
 
 
 
-            Destroy(camDir.gameObject);
+            //actualMoveVec = playerRB.velocity +liftVec + dragVec;
+            playerRB.velocity += liftVec + dragVec;
+
+            //Debug.Log(actualMoveVec);
+
+
+
+
+
+            // if player 'jump' while flying or hit ground, switch to walking controls
+            if (Input.GetButtonDown("Jump") || Physics.CheckSphere(groundCheck.transform.position,
+                        groundCheck.radius,
+                        LayerMask.GetMask("Ground")))
+            {
+                switchToWalking();
+            }
+            
+
+
+
+
+                Destroy(camDir.gameObject);
 
 
         }
@@ -229,7 +278,7 @@ public class PlayerControlScript : MonoBehaviour
                 else
                 {
                     // is not on ground, so switch to flying
-                    flying = true;
+                    switchToFlying();
                     Debug.Log("not jump");
                 }
 
@@ -270,9 +319,10 @@ public class PlayerControlScript : MonoBehaviour
             //}
             //else
             //{
-               //Debug.Log(actualMoveVec);
+            //Debug.Log(actualMoveVec);
             //    playerRB.AddForce(actualMoveVec, ForceMode.Acceleration);
             //}
+
 
             Vector3 newVelocity = actualMoveVec;
             newVelocity.y += playerRB.velocity.y;
@@ -280,10 +330,33 @@ public class PlayerControlScript : MonoBehaviour
             playerRB.velocity = newVelocity;
 
 
-
         }
+            
 
 
+    }
+
+    void switchToFlying()
+    {
+        //make model fly
+
+        Transform playerModel = playerTrans.Find("playerModel/Capsule").transform;
+        playerModel.localRotation = Quaternion.Euler(90, 0, 0);
+
+
+        flying = true;
+
+    }
+
+    void switchToWalking()
+    {
+        //make model walk
+        Transform playerModel = playerTrans.Find("playerModel/Capsule").transform;
+        playerTrans.rotation = Quaternion.Euler(0, 0, 0);
+        playerModel.localRotation = Quaternion.Euler(0, 0, 0);
+
+
+        flying = false;
 
     }
 
