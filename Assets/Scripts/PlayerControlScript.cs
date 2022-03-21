@@ -30,6 +30,7 @@ public class PlayerControlScript : MonoBehaviour
     public SphereCollider groundCheck;
 
 
+    
     Rigidbody playerRB;
     Transform playerTrans;
 
@@ -111,7 +112,7 @@ public class PlayerControlScript : MonoBehaviour
             //
             //      angle of attack == angle between wing and direction of travel
 
-            float angleOfAttack = Vector3.Angle(playerRB.velocity, playerTrans.Find("playerModel").forward);
+            float angleOfAttack = Vector3.Angle(playerRB.velocity, playerTrans.forward);
             
             float liftCoef = lifeCoefCurve.Evaluate(angleOfAttack);
             float lift = .00326f * Mathf.Pow(playerRB.velocity.magnitude,2) * wingArea * liftCoef;
