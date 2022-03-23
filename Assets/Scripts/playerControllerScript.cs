@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class playerControllerScript: MonoBehaviour
@@ -10,7 +11,8 @@ public class playerControllerScript: MonoBehaviour
     public float walkAccelerationTime = 1; //in seconds
     public float turnSpeed = 1; // in second to do full circle
     public AnimationCurve walkCurve;
-    public float jumpForce;
+    public AnimationCurve jumpCurve;
+    
 
 
     [Header("Gliding")]
@@ -25,6 +27,7 @@ public class playerControllerScript: MonoBehaviour
     public float camSensitivity;
 
     public SphereCollider groundCheck;
+    public float isGroundedMax;
 
 
 
@@ -39,9 +42,12 @@ public class playerControllerScript: MonoBehaviour
     float speed = 0;
     float speedTime = 0; //used with walk acceleration curve to create walk speed curve
 
+    float jumpTime = -1; //used with jump curve
+    float currentJumpHeight = 0;
+
     const float gravity = 9.81f;
 
-
+    float isGrounded = 0; //is short timer, will be false after not been on ground for isGroundedMax seconds.
     bool flying = false;
 
     // Start is called before the first frame update
@@ -52,6 +58,7 @@ public class playerControllerScript: MonoBehaviour
         //actualMoveVec = new Vector3(0, 0, 0);
         playerModel = transform.Find("playerModel");
 
+
     }
 
     // Update is called once per frame
@@ -61,6 +68,16 @@ public class playerControllerScript: MonoBehaviour
         float mouseY = -camSensitivity * Input.GetAxis("Mouse Y");
 
         Vector3 velocity = Vector3.zero;
+
+        if (playerCC.isGrounded)
+        {
+            isGrounded = isGroundedMax;
+        }
+        else
+        {
+            isGrounded -= Time.deltaTime;
+            isGrounded = Mathf.Clamp(isGrounded, 0, isGroundedMax);
+        }
 
         if (flying)
         {
@@ -99,42 +116,78 @@ public class playerControllerScript: MonoBehaviour
             Transform camDir = new GameObject().transform;
             camDir.rotation = Quaternion.Euler(0, playerCamTrans.rotation.eulerAngles.y, 0);
 
-            Vector3 playerRot = playerTrans.localRotation.eulerAngles;
+            Vector3 playerRot = Vector3.zero;
             playerRot.x += -moveVert * maxPitchSpeed * Time.deltaTime;
             playerRot.z += -moveHorz * maxRollSpeed * Time.deltaTime;
 
-            playerTrans.rotation = Quaternion.Euler(playerRot);
+            //playerModel.localRotation = Quaternion.Euler(playerRot);
+
+            //playerModel.RotateAround(playerModel.up, playerRot.x);
+            playerModel.Rotate(playerRot);
 
             Destroy(camDir.gameObject);
 
             //angle between x and xz plane
-            float xAngle = playerTrans.rotation.eulerAngles.x;
+            float xAngleGrav = playerModel.rotation.eulerAngles.x;
 
             //need to make x angle fit {0,90}, and then need that range to fit {minGravity,1}
 
-            if(180 <= xAngle && xAngle <= 360)
+            if(180 <= xAngleGrav && xAngleGrav <= 360)
             {
-                xAngle -= 180;
+                xAngleGrav -= 180;
             }
-            if(90<= xAngle && xAngle <= 180)
+            if(90<= xAngleGrav && xAngleGrav <= 180)
             {
-                xAngle -= 90;
+                xAngleGrav = 180 - xAngleGrav;
             }
             //now xAngle is between 0 and 90
 
+
             
-            float gravModifier = (xAngle / (90 / 1 - minGravity)) + minGravity;
+            float gravModifier = (xAngleGrav / (90 / 1 - minGravity)) + minGravity;
             //gravModifeir is in range {minGravity,1}
 
 
-            velocity = playerTrans.forward * speed + gravModifier * Vector3.down * gravity * Time.deltaTime;
+
+            //determine speed
+
+            //angle between x and xz plane
+            float xAngleSp = playerModel.rotation.eulerAngles.x;
+
+            //need to make x angle fit {-90,90}, and then need that range to fit {-1,1}
+            if(180 <= xAngleSp && xAngleSp <= 360)
+            {
+                xAngleSp -= 360;
+            }
+            //xAngleSp new in range {-180,180}
+
+            if(90 <= Mathf.Abs(xAngleSp) && Mathf.Abs(xAngleSp) <= 180)
+            {
+                xAngleSp = Mathf.Sign(xAngleSp) * 180 - xAngleSp;
+            }
+            //xAngleSp now in range {-90,90}
+
+            xAngleSp /= 90;
+
+            //xAngleSp now in range {-1,1}
+
+            speed += xAngleSp * gravity*Time.deltaTime;
+            speed = Mathf.Clamp(speed, 0, Mathf.Infinity);
+            Debug.Log("Angle: "+ xAngleSp + " speed: " + speed);
+
+
+            Debug.Log("grav " + gravModifier +" "+ gravModifier * Vector3.down * gravity * Time.deltaTime);
+            velocity = playerModel.forward * speed * Time.deltaTime + gravModifier * Vector3.down * gravity * Time.deltaTime;
 
             playerCC.Move(velocity);
 
-            speed = velocity.magnitude;
+
 
             
+            //speed = velocity.magnitude;
 
+
+            //Debug.Log(velocity.magnitude);
 
 
 
@@ -142,9 +195,10 @@ public class playerControllerScript: MonoBehaviour
 
 
             // if player 'jump' while flying or hit ground, switch to walking controls
-            if (Input.GetButtonDown("Jump") || Physics.CheckSphere(groundCheck.transform.position,
-                        groundCheck.radius,
-                        LayerMask.GetMask("Ground")))
+            //if (Input.GetButtonDown("Jump") || Physics.CheckSphere(groundCheck.transform.position,
+            //            groundCheck.radius,
+            //            LayerMask.GetMask("Ground")))
+            if(Input.GetButtonDown("Jump") || Convert.ToBoolean(isGrounded) )
             {
                 switchToWalking();
             }
@@ -237,34 +291,43 @@ public class playerControllerScript: MonoBehaviour
             
                 
 
-            if (!playerCC.isGrounded)
-            {
-                //if not on ground, add gravity
-                velocity += Vector3.down * gravity * Time.deltaTime;
-            }
+            
 
 
 
-            Debug.Log(velocity/Time.deltaTime);
+            //Debug.Log(velocity/Time.deltaTime);
 
 
 
-            Debug.Log(playerCC.isGrounded);
+            //Debug.Log(playerCC.isGrounded);
+
+
             
 
 
             if (Input.GetButtonDown("Jump"))
             {
                 //do jump if on ground; else switch to flying
-                if (Physics.CheckSphere(groundCheck.transform.position,
-                        groundCheck.radius,
-                        LayerMask.GetMask("Ground")))
+                //if (Physics.CheckSphere(groundCheck.transform.position,
+                //        groundCheck.radius,
+                //        LayerMask.GetMask("Ground")))
+                if(Convert.ToBoolean(isGrounded))
                 {
                     //is on ground, so jump
 
                     //playerRB.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                     //playerRB.velocity += Vector3.up * jumpForce;
-                    
+
+                    jumpTime = 0;
+                    isGrounded = 0;
+
+
+                    float frameHeight = jumpCurve.Evaluate(jumpTime) - currentJumpHeight;
+                    velocity += playerModel.up * frameHeight;
+
+                    currentJumpHeight += frameHeight;
+
+
                     Debug.Log("jump");
 
 
@@ -278,8 +341,32 @@ public class playerControllerScript: MonoBehaviour
 
             }
 
+            //contiue jumping if currently jumping
+            if (jumpTime >= 0)
+            {
+                jumpTime += Time.deltaTime;
+                float frameHeight = jumpCurve.Evaluate(jumpTime) - currentJumpHeight;
+                velocity += playerModel.up * frameHeight;
 
-            
+                currentJumpHeight += frameHeight;
+
+                if (jumpTime >= jumpCurve[jumpCurve.length-1].time)
+                {
+                    //jump over
+                    jumpTime = -1;
+                    currentJumpHeight = 0;
+                }
+
+
+            }
+            else if(!Convert.ToBoolean(isGrounded))
+            {
+                //if not on ground, add gravity
+                velocity += Vector3.down * gravity * Time.deltaTime;
+            }
+
+            Debug.Log(velocity);
+
 
 
         }
