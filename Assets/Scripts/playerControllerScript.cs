@@ -28,7 +28,10 @@ public class playerControllerScript: MonoBehaviour
 
     public SphereCollider groundCheck;
     public float isGroundedMax;
+    public ParticleSystem[] jetPackFires;
+    public Animator wingsAnim;
 
+    public float camMaxDist;
 
 
     CharacterController playerCC;
@@ -182,7 +185,7 @@ public class playerControllerScript: MonoBehaviour
             //Debug.Log("grav " + gravModifier +" "+ gravModifier * Vector3.down * gravity * Time.deltaTime);
             velocity = playerModel.forward * speed * Time.deltaTime + gravModifier * Vector3.down * gravity * Time.deltaTime;
 
-            playerCC.Move(velocity);
+            //playerCC.Move(velocity);
 
 
 
@@ -234,6 +237,23 @@ public class playerControllerScript: MonoBehaviour
                 playerCamTrans.localEulerAngles.y,
                 0
                 );
+
+            ////move cam closer if clipping
+
+            //RaycastHit hit;
+            //Debug.DrawRay(playerCamTrans.position, -playerCamTrans.forward*camMaxDist, Color.red, .5f);
+            //if (Physics.Raycast(playerCamTrans.position, -playerCamTrans.forward, out hit, camMaxDist, LayerMask.GetMask("Player")))
+            //{
+            //    Transform actualCam = playerCamTrans.GetComponentInChildren<Camera>().transform;
+            //    actualCam.localPosition = new Vector3(0, 0, -hit.distance*camMaxDist);
+            //    //Debug.Log("clipping: "+hit.distance);
+            //}
+            //else
+            //{
+            //    Transform actualCam = playerCamTrans.GetComponentInChildren<Camera>().transform;
+            //    actualCam.localPosition = new  Vector3(0, 0, -camMaxDist);
+            //    Debug.Log("not clipping");
+            //}
 
 
             //walking moving controls
@@ -385,6 +405,7 @@ public class playerControllerScript: MonoBehaviour
         Transform playerModel = playerTrans.Find("playerModel/Capsule").transform;
         playerModel.localRotation = Quaternion.Euler(90, 0, 0);
 
+        wingsAnim.SetTrigger("Extend");
 
         flying = true;
 
@@ -396,6 +417,7 @@ public class playerControllerScript: MonoBehaviour
         Transform playerCapsule = playerTrans.Find("playerModel/Capsule").transform;
         playerModel.rotation = Quaternion.Euler(0, 0, 0);
         playerCapsule.localRotation = Quaternion.Euler(0, 0, 0);
+        wingsAnim.SetTrigger("Close");
 
 
         flying = false;
@@ -427,6 +449,28 @@ public class playerControllerScript: MonoBehaviour
         }
         
 
+    }
+
+    public void turnOnJetpack()
+    {
+        foreach(ParticleSystem ps in jetPackFires)
+        {
+            if (!ps.isPlaying)
+            {
+                ps.Play();
+            }
+        }
+    }
+
+    public void turnOffJetpack()
+    {
+        foreach (ParticleSystem ps in jetPackFires)
+        {
+            if (!ps.isStopped)
+            {
+                ps.Stop();
+            }
+        }
     }
 
 }
