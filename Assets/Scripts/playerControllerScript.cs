@@ -50,9 +50,6 @@ public class playerControllerScript: MonoBehaviour
     float isGrounded = 0; //is short timer, will be false after not been on ground for isGroundedMax seconds.
     bool flying = false;
 
-    //for checkpoints
-    GameObject currentCheckPoint = null;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -176,10 +173,10 @@ public class playerControllerScript: MonoBehaviour
 
             speed += xAngleSp * gravity*Time.deltaTime;
             speed = Mathf.Clamp(speed, 0, Mathf.Infinity);
-            //Debug.Log("Angle: "+ xAngleSp + " speed: " + speed);
+            Debug.Log("Angle: "+ xAngleSp + " speed: " + speed);
 
 
-            //Debug.Log("grav " + gravModifier +" "+ gravModifier * Vector3.down * gravity * Time.deltaTime);
+            Debug.Log("grav " + gravModifier +" "+ gravModifier * Vector3.down * gravity * Time.deltaTime);
             velocity = playerModel.forward * speed * Time.deltaTime + gravModifier * Vector3.down * gravity * Time.deltaTime;
 
             playerCC.Move(velocity);
@@ -205,7 +202,7 @@ public class playerControllerScript: MonoBehaviour
             {
                 switchToWalking();
             }
-            //Debug.Log(velocity / Time.deltaTime);
+            Debug.Log(velocity / Time.deltaTime);
 
         }
         else
@@ -221,11 +218,11 @@ public class playerControllerScript: MonoBehaviour
             float xRot;
             if (playerCamTrans.localEulerAngles.x < 180)
             {
-                xRot = Mathf.Clamp(playerCamTrans.localEulerAngles.x, 0, 60);
+                xRot = Mathf.Clamp(playerCamTrans.localEulerAngles.x, 5, 60);
             }
             else
             {
-                xRot = Mathf.Clamp(playerCamTrans.localEulerAngles.x, 345,360);
+                xRot = 5;
             }
 
 
@@ -331,7 +328,7 @@ public class playerControllerScript: MonoBehaviour
                     currentJumpHeight += frameHeight;
 
 
-                    //Debug.Log("jump");
+                    Debug.Log("jump");
 
 
                 }
@@ -339,7 +336,7 @@ public class playerControllerScript: MonoBehaviour
                 {
                     // is not on ground, so switch to flying
                     switchToFlying();
-                    //Debug.Log("not jump");
+                    Debug.Log("not jump");
                 }
 
             }
@@ -368,7 +365,7 @@ public class playerControllerScript: MonoBehaviour
                 velocity += Vector3.down * gravity * Time.deltaTime;
             }
 
-            //Debug.Log(velocity);
+            Debug.Log(velocity);
 
 
 
@@ -393,40 +390,12 @@ public class playerControllerScript: MonoBehaviour
     void switchToWalking()
     {
         //make model walk
-        Transform playerCapsule = playerTrans.Find("playerModel/Capsule").transform;
-        playerModel.rotation = Quaternion.Euler(0, 0, 0);
-        playerCapsule.localRotation = Quaternion.Euler(0, 0, 0);
+        Transform playerModel = playerTrans.Find("playerModel/Capsule").transform;
+        playerTrans.rotation = Quaternion.Euler(0, 0, 0);
+        playerModel.localRotation = Quaternion.Euler(0, 0, 0);
 
 
         flying = false;
 
     }
-
-    public void setCheckPoint(GameObject checkPoint)
-    {
-        //disable currentCheckPoint OOBPlane
-        if(currentCheckPoint != null)
-        {
-            currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(false);
-        }
-        
-        currentCheckPoint = checkPoint;
-        currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(true);
-
-        //Debug.Log(currentCheckPoint);
-    }
-
-    public void resetToCheckPoint()
-    {
-        playerCC.enabled = false;
-        transform.position = currentCheckPoint.transform.position;
-        playerCC.enabled = true;
-        if (flying)
-        {
-            switchToWalking();
-        }
-        
-
-    }
-
 }
