@@ -2,11 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class playerControllerScript: MonoBehaviour
 {
+
+    
+
+
     [Header("Walking")]
     public float maxWalkSpeed;
+    public float sprintSpeed;
     //public float walkSpeedScale;
     public float walkAccelerationTime = 1; //in seconds
     public float turnSpeed = 1; // in second to do full circle
@@ -20,7 +26,19 @@ public class playerControllerScript: MonoBehaviour
     public float maxPitchSpeed;
     [RangeAttribute(0,1)]
     public float minGravity;
+    
+
+    [Header("Jetpack")]
+
+    public GameObject jetpackObj;
     public float jetpackPower;
+    public ParticleSystem[] jetPackFires;
+    public Animator wingsAnim;
+    public float maxFuel;
+    public float refuelRate;
+    public Slider fuelSlider;
+    private float currentFuel;
+    private bool jetpackEnabled;
 
 
     [Header("Other")]
@@ -29,11 +47,12 @@ public class playerControllerScript: MonoBehaviour
 
     public SphereCollider groundCheck;
     public float isGroundedMax;
-    public ParticleSystem[] jetPackFires;
-    public Animator wingsAnim;
-
     public float camMaxDist;
 
+
+
+    
+    
 
     CharacterController playerCC;
     Transform playerTrans;
@@ -65,7 +84,9 @@ public class playerControllerScript: MonoBehaviour
         //actualMoveVec = new Vector3(0, 0, 0);
         playerModel = transform.Find("playerModel");
 
+        enableJetpack(jetpackEnabled);
 
+        currentFuel = maxFuel;
     }
 
     // Update is called once per frame
@@ -185,15 +206,20 @@ public class playerControllerScript: MonoBehaviour
 
 
             //use jetpack
-            if (Input.GetButton("Sprint"))
+            if (Input.GetButton("Sprint") && jetpackEnabled && currentFuel > 0)
             {
                 speed += jetpackPower * Time.deltaTime;
+                currentFuel -= Time.deltaTime;
+                Mathf.Clamp(currentFuel, 0, maxFuel);
+                fuelSlider.value = currentFuel / maxFuel;
                 turnOnJetpack();
             }
             else
             {
                 turnOffJetpack();
             }
+
+            
 
 
             //Debug.Log("grav " + gravModifier +" "+ gravModifier * Vector3.down * gravity * Time.deltaTime);
@@ -323,6 +349,15 @@ public class playerControllerScript: MonoBehaviour
 
             speed = walkCurve.Evaluate(speedTime/walkAccelerationTime)*maxWalkSpeed;
 
+            if (Input.GetButton("Sprint"))
+            {
+                //Debug.Log((speed / Time.deltaTime));
+                speed += sprintSpeed;
+            }
+            else
+            {
+                
+            }
             
             velocity = playerModel.forward * speed * Time.deltaTime;
             
@@ -408,6 +443,16 @@ public class playerControllerScript: MonoBehaviour
 
         }
 
+        //refuel jetpack
+        if (Convert.ToBoolean(isGrounded) && currentFuel < maxFuel)
+        {
+            Debug.Log("refueling");
+            currentFuel += refuelRate * Time.deltaTime;
+            Mathf.Clamp(currentFuel, 0, maxFuel);
+            fuelSlider.value = currentFuel / maxFuel;
+        }
+
+        //actually move player
         playerCC.Move(velocity);
 
        
@@ -465,6 +510,14 @@ public class playerControllerScript: MonoBehaviour
         
 
     }
+
+    public void enableJetpack(bool value = true)
+    {
+        jetpackEnabled = value;
+        jetpackObj.SetActive(jetpackEnabled);
+        fuelSlider.gameObject.SetActive(jetpackEnabled);
+    }
+    
 
     public void turnOnJetpack()
     {
