@@ -20,6 +20,7 @@ public class playerControllerScript: MonoBehaviour
     public float maxPitchSpeed;
     [RangeAttribute(0,1)]
     public float minGravity;
+    public float jetpackPower;
 
 
     [Header("Other")]
@@ -182,6 +183,19 @@ public class playerControllerScript: MonoBehaviour
             //Debug.Log("Angle: "+ xAngleSp + " speed: " + speed);
 
 
+
+            //use jetpack
+            if (Input.GetButton("Sprint"))
+            {
+                speed += jetpackPower * Time.deltaTime;
+                turnOnJetpack();
+            }
+            else
+            {
+                turnOffJetpack();
+            }
+
+
             //Debug.Log("grav " + gravModifier +" "+ gravModifier * Vector3.down * gravity * Time.deltaTime);
             velocity = playerModel.forward * speed * Time.deltaTime + gravModifier * Vector3.down * gravity * Time.deltaTime;
 
@@ -189,14 +203,14 @@ public class playerControllerScript: MonoBehaviour
 
 
 
-            
+
             //speed = velocity.magnitude;
 
 
             //Debug.Log(velocity.magnitude);
 
 
-
+            
 
 
 
@@ -419,6 +433,7 @@ public class playerControllerScript: MonoBehaviour
         playerCapsule.localRotation = Quaternion.Euler(0, 0, 0);
         wingsAnim.SetTrigger("Close");
 
+        turnOffJetpack();
 
         flying = false;
 
