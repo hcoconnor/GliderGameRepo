@@ -205,6 +205,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3989722195292566818}
     m_Modifications:
+    - target: {fileID: 4608293031888041104, guid: f048ecd1c9e056542b4c3d5762043fe6, type: 3}
+      propertyPath: m_Intensity
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5067129496528811823, guid: f048ecd1c9e056542b4c3d5762043fe6, type: 3}
       propertyPath: m_Name
       value: Lantern

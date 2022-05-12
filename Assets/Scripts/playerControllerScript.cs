@@ -493,17 +493,21 @@ public class playerControllerScript: MonoBehaviour
 
     public void setCheckPoint(GameObject checkPoint)
     {
-        if (Convert.ToBoolean(isGrounded))
+        //Debug.Log("trying to set");
+        if (Convert.ToBoolean(isGrounded) && checkPoint != currentCheckPoint)
         {
             //disable currentCheckPoint OOBPlane
             if(currentCheckPoint != null)
             {
                 currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(false);
+                currentCheckPoint.transform.GetComponentInChildren<Light>().intensity = 0f;
             }
         
             currentCheckPoint = checkPoint;
             currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(true);
-        
+            currentCheckPoint.transform.GetComponentInChildren<Light>().intensity = 14.83f;
+            //Debug.Log(currentCheckPoint.transform.GetComponentInChildren<Light>().intensity);
+
             //Debug.Log(currentCheckPoint);
         }
         

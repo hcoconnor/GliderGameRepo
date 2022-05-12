@@ -5,7 +5,7 @@ using UnityEngine;
 public class CheckPointTriggerScript : MonoBehaviour
 {
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         playerControllerScript pcScript = 
             other.transform.root.GetComponent<playerControllerScript>();
@@ -20,4 +20,5 @@ public class CheckPointTriggerScript : MonoBehaviour
         
     }
 
+    
 }

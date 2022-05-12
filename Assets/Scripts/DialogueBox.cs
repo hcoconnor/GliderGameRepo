@@ -30,11 +30,11 @@ public class DialogueBox : MonoBehaviour
     {
         playerControllerScript pcScript =
             other.transform.root.GetComponent<playerControllerScript>();
-        Debug.Log("Triggered1");
+        //Debug.Log("Triggered1");
         if (!triggered && pcScript != null)
         {
             triggered = true;
-            Debug.Log("triggered2");
+           // Debug.Log("triggered2");
             StartCoroutine(playAnim());
         }
         
