@@ -501,7 +501,8 @@ public class playerControllerScript: MonoBehaviour
         
         currentCheckPoint = checkPoint;
         currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(true);
-
+        speed = 0;
+        speedTime = 0;
         //Debug.Log(currentCheckPoint);
     }
 
