@@ -8,7 +8,7 @@ public class DialogueBox : MonoBehaviour
 
     public string text;
     [Range(1f, 60f)]
-    public float totalSec;
+    public float totalSec = 10f;
 
     
     private bool triggered = false;
@@ -28,10 +28,13 @@ public class DialogueBox : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!triggered)
+        playerControllerScript pcScript =
+            other.transform.root.GetComponent<playerControllerScript>();
+        Debug.Log("Triggered1");
+        if (!triggered && pcScript != null)
         {
             triggered = true;
-            Debug.Log("triggered");
+            Debug.Log("triggered2");
             StartCoroutine(playAnim());
         }
         

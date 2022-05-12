@@ -452,7 +452,7 @@ public class playerControllerScript: MonoBehaviour
             //refuel jetpack
             if (Convert.ToBoolean(isGrounded) && currentFuel < maxFuel)
             {
-                Debug.Log("refueling");
+                //Debug.Log("refueling");
                 currentFuel += refuelRate * Time.deltaTime;
                 Mathf.Clamp(currentFuel, 0, maxFuel);
                 fuelSlider.value = currentFuel / maxFuel;
@@ -493,17 +493,20 @@ public class playerControllerScript: MonoBehaviour
 
     public void setCheckPoint(GameObject checkPoint)
     {
-        //disable currentCheckPoint OOBPlane
-        if(currentCheckPoint != null)
+        if (Convert.ToBoolean(isGrounded))
         {
-            currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(false);
+            //disable currentCheckPoint OOBPlane
+            if(currentCheckPoint != null)
+            {
+                currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(false);
+            }
+        
+            currentCheckPoint = checkPoint;
+            currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(true);
+        
+            //Debug.Log(currentCheckPoint);
         }
         
-        currentCheckPoint = checkPoint;
-        currentCheckPoint.transform.Find("OOBPlane").gameObject.SetActive(true);
-        speed = 0;
-        speedTime = 0;
-        //Debug.Log(currentCheckPoint);
     }
 
     public void resetToCheckPoint()
@@ -511,6 +514,8 @@ public class playerControllerScript: MonoBehaviour
         playerCC.enabled = false;
         transform.position = currentCheckPoint.transform.position;
         playerCC.enabled = true;
+        speed = 0;
+        speedTime = 0;
         if (flying)
         {
             switchToWalking();

@@ -903,7 +903,7 @@ MonoBehaviour:
       outWeight: 0.18423702
     - serializedVersion: 3
       time: 0.5
-      value: 2
+      value: 4
       inSlope: 3.1473544
       outSlope: 3.1473544
       tangentMode: 0
@@ -924,6 +924,7 @@ MonoBehaviour:
   wingsAnim: {fileID: 8092519766261969355}
   maxFuel: 2
   refuelRate: 2
+  fuelSlider: {fileID: 0}
   playerCamTrans: {fileID: 6950094688564238010}
   camSensitivity: 10
   groundCheck: {fileID: 6950094688552250967}

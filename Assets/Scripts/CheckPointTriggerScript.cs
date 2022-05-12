@@ -15,7 +15,7 @@ public class CheckPointTriggerScript : MonoBehaviour
             //other is player
 
             pcScript.setCheckPoint(transform.parent.gameObject);
-            Debug.Log("trigger enter");
+            //Debug.Log("trigger enter");
         }
         
     }
