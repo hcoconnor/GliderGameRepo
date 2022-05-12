@@ -327,16 +327,16 @@ public class playerControllerScript: MonoBehaviour
                     //no player input, slow character
                     speedTime = Mathf.Clamp(speedTime - Time.deltaTime, 0, walkAccelerationTime);
                 }
-                //else if (180 - Vector3.Angle(playerModel.forward, playerInputVec) <= 2.5)
-                //{
-                //    //reverse speed
-                //    speedTime = Mathf.Clamp(speedTime - 1.5f * Time.deltaTime, 0, walkAccelerationTime);
-                //    //Debug.Log(intendedMoveTime);
+                else if (180 - Vector3.Angle(playerModel.forward, playerInputVec) <= 2.5 && speedTime != 0)
+                {
+                    //reverse speed
+                    speedTime = Mathf.Clamp(speedTime - 1.5f * Time.deltaTime, 0, walkAccelerationTime);
+                    //Debug.Log(intendedMoveTime);
 
-                //    //face direction of movement
-                //    playerModel.rotation = Quaternion.RotateTowards(playerModel.rotation, Quaternion.LookRotation(playerInputVec), turnSpeed * 360 * Time.deltaTime);
+                    //face direction of movement
+                    //playerModel.rotation = Quaternion.RotateTowards(playerModel.rotation, Quaternion.LookRotation(playerInputVec), turnSpeed * 360 * Time.deltaTime);
 
-                //}
+                }
                 else
                 {
                     Vector3 lastFacing = playerModel.forward;
